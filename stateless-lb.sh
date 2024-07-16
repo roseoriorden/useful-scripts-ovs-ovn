@@ -32,3 +32,18 @@ ovs-vsctl set interface alice0 external-ids:iface-id=bob
 ovs-vsctl set interface alice0 external-ids:iface-id=carol
 ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lb-add lb 10.0.0.17 10.0.0.3,10.0.0.2
 # time to connect the lb and switch to a lr
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lr-add lr0
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lrp-add lr0 lr0-sw0 00:00:00:00:ff:01 10.0.0.18/24
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lsp-add sw0 sw0-lr0
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lsp-set-type sw0-lr0 router
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lsp-set-type-addresses sw0-lr0 router
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lsp-set-addresses sw0-lr0 router
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lsp-set-options sw0-lr0 router-port=lr0-sw0
+ovn-nbctl --db=unix:/home/rose/tmp-ovs/nb-db.sock lr-lb-add lr0 lb
+
+
+# ovn-trace --db=unix:$(pwd)/sb-db.sock sw0 'inport == "alice" && ip4.dst == 10.0.0.2 && eth.dst == aa:55:aa:55:00:02'
+
+
+#then you can run nc in two other terminals as bob and carol
+#sudo ip netns exec carol nc -k -l 0.0.0.0 12346
