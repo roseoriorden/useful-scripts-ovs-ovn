@@ -1,4 +1,4 @@
-# four.netns.sh
+# four-netns.sh
 run first
 
 # stateless-lb.sh
