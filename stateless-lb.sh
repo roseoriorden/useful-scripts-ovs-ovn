@@ -3,6 +3,8 @@
 set -x #prints
 set -e #exits on error
 #cd /home/rose/ovn && export OVN_RUNDIR=$(pwd) && export OVN_LOGDIR=$(pwd) && export OVN_DBDIR=$(pwd) && export PATH=$PATH:/home/rose/ovn/utilities/ && export PATH=$PATH:/home/rose/ovn/northd/ && export PATH=$PATH:/home/rose/ovn/controller/ && cd /home/rose/tmp-ovs && export OVS_RUNDIR=$(pwd) && export OVS_LOGDIR=$(pwd) && export OVS_DBDIR=$(pwd)
+mkdir /home/rose/tmp-ovn/
+mkdir /home/rose/tmp-ovs/
 cd /home/rose/tmp-ovs
 export OVS_RUNDIR=$(pwd)
 export OVS_LOGDIR=$(pwd)
