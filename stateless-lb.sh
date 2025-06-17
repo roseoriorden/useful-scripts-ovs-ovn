@@ -1,28 +1,24 @@
 #!/bin/bash
 
+echo "Make sure /tmp-ovn/ and /tmp-ovs/ directories are created, and OVN_RUNDIR and OVS_RUNDIR are set to those respectively."
+echo "Make sure OVN_DIR is set to the directory of your OVN repo."
+
 set -x #prints
 set -e #exits on error
-#cd /home/rose/ovn && export OVN_RUNDIR=$(pwd) && export OVN_LOGDIR=$(pwd) && export OVN_DBDIR=$(pwd) && export PATH=$PATH:/home/rose/ovn/utilities/ && export PATH=$PATH:/home/rose/ovn/northd/ && export PATH=$PATH:/home/rose/ovn/controller/ && cd /home/rose/tmp-ovs && export OVS_RUNDIR=$(pwd) && export OVS_LOGDIR=$(pwd) && export OVS_DBDIR=$(pwd)
-mkdir /home/rose/tmp-ovn/
-mkdir /home/rose/tmp-ovs/
-cd /home/rose/tmp-ovs
-export OVS_RUNDIR=$(pwd)
-export OVS_LOGDIR=$(pwd)
-export OVS_DBDIR=$(pwd)
-cd /home/rose/tmp-ovn
-export OVN_RUNDIR=$(pwd)
-export OVN_LOGDIR=$(pwd)
-export OVN_DBDIR=$(pwd)
-export PATH=$PATH:/home/rose/ovn/utilities/
-export PATH=$PATH:/home/rose/ovn/northd/
-export PATH=$PATH:/home/rose/ovn/controller/
+
+#mkdir /home/rose/ovn-topology-test/tmp-ovn/ && mkdir /home/rose/ovn-topology-test/tmp-ovs/
+export OVS_LOGDIR=$OVS_RUNDIR
+export OVS_DBDIR=$OVS_RUNDIR
+export OVN_LOGDIR=$OVN_RUNDIR
+export OVN_DBDIR=$OVN_RUNDIR
 rm -f $OVN_RUNDIR/nb.db
 rm -f $OVN_RUNDIR/sb.db
 rm -f $OVS_RUNDIR/conf.db
-ovsdb-tool create nb.db /home/rose/ovn/ovn-nb.ovsschema
-ovsdb-tool create sb.db /home/rose/ovn/ovn-sb.ovsschema
+cd $OVN_RUNDIR
+ovsdb-tool create nb.db $OVN_DIR/ovn-nb.ovsschema
+ovsdb-tool create sb.db $OVN_DIR/ovn-sb.ovsschema
 cd $OVS_RUNDIR
-ovsdb-tool create conf.db /home/rose/ovs/vswitchd/vswitch.ovsschema
+ovsdb-tool create conf.db $OVN_DIR/ovs/vswitchd/vswitch.ovsschema
 cd $OVN_RUNDIR
 ovsdb-server --detach --no-chdir --pidfile=nb.pid -vconsole:off --log-file=nb-db.log -vsyslog:off --remote=punix:$OVN_RUNDIR/nb-db.sock nb.db
 ovsdb-server --detach --no-chdir --pidfile=sb.pid -vconsole:off --log-file=sb-db.log -vsyslog:off --remote=punix:$OVN_RUNDIR/sb-db.sock sb.db
@@ -31,14 +27,14 @@ ovsdb-server --detach --no-chdir --pidfile=conf.pid -vconsole:off --log-file=db-
 sudo -E PATH=$PATH ip netns exec ovs-main ovs-vswitchd --detach --no-chdir --pidfile=ovs-vswitchd.pid -vconsole:off --log-file=ovs-vswitchd.log -vsyslog:off --unixctl=ovs-vswitchd.ctl unix:$OVS_RUNDIR/conf.sock
 #sudo /usr/share/openvswitch/scripts/ovs-ctl start
 #to exit vswitchd:
-#sudo -E PATH=$PATH ovs-appctl --target=/home/rose/ovn/ovs-vswitchd.ctl exit
-# might need to do: sudo -E /home/rose/ovn/northd/ovn-northd ...
+#sudo -E PATH=$PATH ovs-appctl --target=$OVN_DIR/ovs-vswitchd.ctl exit
+# might need to do: sudo -E $OVN_DIR/northd/ovn-northd ...
 cd $OVN_RUNDIR
 ovn-northd --detach --no-chdir --pidfile=ovn-northd.pid -vconsole:off --log-file=ovn-northd.log -vsyslog:off --ovnsb-db=unix:$OVN_RUNDIR/sb-db.sock --ovnnb-db=unix:$OVN_RUNDIR/nb-db.sock
 # ovn-appctl -t ovn-northd status
 # ovn-appctl -t ovn-northd sb-connection-status
 ovs-vsctl --db=unix:$OVS_RUNDIR/conf.sock --may-exist add-br br-int
-sudo -E PATH=$PATH /home/rose/ovn/controller/ovn-controller --detach --no-chdir -vsyslog:off --log-file=$OVN_RUNDIR/ovn-controller.log --pidfile=$OVN_RUNDIR/ovn-controller.pid -vconsole:off unix:$OVS_RUNDIR/conf.sock
+sudo -E PATH=$PATH $OVN_DIR/controller/ovn-controller --detach --no-chdir -vsyslog:off --log-file=$OVN_RUNDIR/ovn-controller.log --pidfile=$OVN_RUNDIR/ovn-controller.pid -vconsole:off unix:$OVS_RUNDIR/conf.sock
 ovs-vsctl --db=unix:$OVS_RUNDIR/conf.sock add-port br-int alice0
 ovs-vsctl --db=unix:$OVS_RUNDIR/conf.sock add-port br-int bob0
 ovs-vsctl --db=unix:$OVS_RUNDIR/conf.sock add-port br-int carol0

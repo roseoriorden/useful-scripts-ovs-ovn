@@ -5,5 +5,5 @@ pkill ovsdb-server
 pkill ovn-controller
 pkill ovn-northd
 
-rm -rf /home/rose/tmp-ovn/
-rm -rf /home/rose/tmp-ovs/
+rm -rf $OVN_RUNDIR/*
+rm -rf $OVS_RUNDIR/*
