@@ -1,3 +1,4 @@
+#set -e
 declare -a env_vars=(
     "OVN_RUNDIR"
     "OVS_RUNDIR"
@@ -24,12 +25,21 @@ else
 fi
 
 set -x
+
+# Export variables to pass them into the following scripts
+export OVN_RUNDIR
+export OVS_RUNDIR
+export OVN_DIR
 export PATH=$PATH:$OVN_DIR/utilities/
 export PATH=$PATH:$OVN_DIR/northd/
 export PATH=$PATH:$OVN_DIR/controller/
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
-sudo bash ./stop-everything.sh
-sudo bash four-netns.sh
-bash stateless-lb.sh
-bash 16-steps.sh
+echo "Executing script 1/4..."
+sudo -E bash ./stop-everything.sh
+echo "Executing script 2/4..."
+sudo -E bash four-netns.sh
+echo "Executing script 3/4..."
+bash -E stateless-lb.sh
+echo "Executing script 4/4..."
+bash -E 16-steps.sh

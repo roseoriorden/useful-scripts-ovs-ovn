@@ -1,4 +1,5 @@
 set -x
+set -e
 rm -f $OVS_RUNDIR/conf2.db
 
 # Create a new network namespace (ovs-second).
