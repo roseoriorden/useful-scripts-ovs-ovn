@@ -3,6 +3,18 @@ sets up a stateless lb using OVN with bob and carol as backends, allowing for co
 
 # Full topology:
 Run `sudo -E bash do-everything.sh`
+
+Then, run:
+
+in terminal 1:
+`sudo ip netns exec carol nc -k -l 0.0.0.0 12346`
+
+in terminal 2:
+`sudo ip netns exec bob nc -k -l 0.0.0.0 12346`
+
+in terminal 3:
+`sudo ip netns exec alice nc 10.0.0.17 12346 <<< "write whatever you want here, and it will show up on bob or carol's end!"`
+
 ![topology](topology.png)
 To undo everything, run `sudo -E bash stop-everything.sh`
 
